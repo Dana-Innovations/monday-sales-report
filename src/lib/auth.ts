@@ -1,8 +1,9 @@
 import NextAuth from 'next-auth'
+import type { Provider } from 'next-auth/providers'
 import Okta from 'next-auth/providers/okta'
 import Credentials from 'next-auth/providers/credentials'
 
-const providers = [
+const providers: Provider[] = [
   Okta({
     clientId: process.env.OKTA_CLIENT_ID,
     clientSecret: process.env.OKTA_CLIENT_SECRET,
