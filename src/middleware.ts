@@ -11,8 +11,9 @@ export default auth((req) => {
   const isGatePublic =
     path === '/gate' || path.startsWith('/api/gate') || path.startsWith('/api/auth')
 
-  // Layer 1: shared password
-  const hasGate = req.cookies.get('site_access')?.value === GATE_TOKEN
+  // Layer 1: shared password. Fail closed if the token is unavailable.
+  const cookieVal = req.cookies.get('site_access')?.value
+  const hasGate = !!GATE_TOKEN && cookieVal === GATE_TOKEN
   if (!hasGate && !isGatePublic) {
     const url = new URL('/gate', nextUrl)
     url.searchParams.set('next', path + nextUrl.search)
