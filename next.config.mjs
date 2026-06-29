@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Ensure the report HTML (kept at repo root) is bundled into the /report function
+  // Bundle the report shell + per-week data into the /report function
   outputFileTracingIncludes: {
-    '/report': ['./index.html'],
+    '/report': ['./index.html', './data/**/*'],
   },
 };
 
