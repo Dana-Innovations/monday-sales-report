@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monday Sales Report — Sonance</title>
+<style>
+:root { color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: #ECEEF2;
+  color: #333F48;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ── HEADER ── */
+.report-header {
+  background: #0D0D0D;
+  color: white;
+  padding: 0 24px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 62px;
+}
+.hdr-brand { display: flex; align-items: center; gap: 14px; padding: 12px 0; }
+.brand-stripe { width: 4px; height: 40px; background: #00A3E0; border-radius: 2px; flex-shrink: 0; }
+.hdr-title { font-size: 17px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.hdr-meta  { font-size: 11px; color: #888; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 3px; }
+.hdr-right { display: flex; align-items: center; gap: 0; padding: 12px 0; }
+.ship-block { text-align: center; border-left: 1px solid #333; padding: 0 0 0 24px; }
+.ship-num  { font-size: 34px; font-weight: 900; color: #00A3E0; line-height: 1; }
+.ship-lbl  { font-size: 9px; color: #888; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+
+/* ── WEEK SELECTOR ── */
+.week-nav {
+  background: #181818;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid #2A2A2A;
+  overflow: hidden;
+}
+.week-arrow {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 10px 10px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+  user-select: none;
+  line-height: 1;
+}
+.week-arrow:hover { color: #00A3E0; }
+.week-arrow:disabled { color: #444; cursor: default; }
+
+.week-strip-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.week-strip-wrap::before,
+.week-strip-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  z-index: 2;
+}
+.week-strip-wrap::before { left: 0;  background: linear-gradient(to right, #181818, transparent); }
+.week-strip-wrap::after  { right: 0; background: linear-gradient(to left,  #181818, transparent); }
+
+.week-strip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 8px 24px;
+  scrollbar-width: none;
+}
+.week-strip::-webkit-scrollbar { display: none; }
+
+.month-group { display: flex; align-items: center; gap: 4px; }
+.month-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #555;
+  padding: 0 8px 0 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.month-divider {
+  width: 1px; height: 20px;
+  background: #333;
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+.week-chip {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #333;
+  color: #888;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.week-chip:hover { border-color: #00A3E0; color: #00A3E0; }
+.week-chip.active {
+  background: #00A3E0;
+  border-color: #00A3E0;
+  color: white;
+  font-weight: 700;
+}
+.week-chip.latest::after {
+  content: ' ●';
+  font-size: 7px;
+  vertical-align: super;
+  color: #22CC66;
+}
+.week-chip.active.latest::after { color: white; }
+
+/* ── MAIN ── */
+.main { padding: 16px 24px 28px; max-width: 1440px; margin: 0 auto; }
+
+.sec-hdr {
+  display: flex; align-items: center; gap: 10px;
+  margin: 18px 0 10px;
+}
+.sec-hdr h2 {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #888; white-space: nowrap;
+}
+.sec-hdr::after { content: ''; flex: 1; height: 1px; background: #D8DCE3; }
+
+/* ── GRIDS ── */
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.g2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.g7 { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+
+/* ── CARDS ── */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 8px rgba(0,0,0,0.03);
+}
+.card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.card-ch   { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
+.pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.02em; }
+.pill-green  { background: #E8F5EC; color: #1A7A3C; }
+.pill-red    { background: #FDF0EE; color: #B83228; }
+.pill-orange { background: #FEF6E8; color: #B86800; }
+.pill-blue   { background: #E8F5FC; color: #1070A0; }
+.pill-gray   { background: #F0F2F5; color: #888; }
+
+.big-num  { font-size: 24px; font-weight: 800; color: #0D0D0D; letter-spacing: -0.03em; }
+.num-lbl  { font-size: 11px; color: #AAA; margin-top: 2px; }
+.cmp-row  { display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F0F2F5; }
+.cmp-item { flex: 1; }
+.cmp-val  { font-size: 13px; font-weight: 700; color: #333F48; }
+.cmp-sub  { font-size: 10px; color: #AAA; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+
+.prog-row { display: flex; justify-content: space-between; margin: 8px 0 4px; }
+.prog-goal { font-size: 11px; color: #888; }
+.prog-var  { font-size: 11px; font-weight: 700; }
+.var-pos { color: #1A7A3C; } .var-neg { color: #B83228; }
+.prog-bg { height: 7px; background: #EEF0F4; border-radius: 4px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.fill-blue   { background: #00A3E0; }
+.fill-green  { background: #22A855; }
+.fill-orange { background: #E07A00; }
+.fill-red    { background: #C0392B; }
+
+/* ── NA CARD ── */
+.na-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 80px;
+  color: #CCC; font-size: 12px; font-style: italic;
+}
+
+/* ── MINI CARDS ── */
+.mini-card {
+  background: white; border-radius: 8px; padding: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  position: relative; overflow: hidden;
+}
+.mini-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.mc-blue::before   { background: #00A3E0; }
+.mc-green::before  { background: #22A855; }
+.mc-red::before    { background: #C0392B; }
+.mc-orange::before { background: #E07A00; }
+.mc-gray::before   { background: #CCC; }
+.mini-lbl  { font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+.mini-val  { font-size: 14px; font-weight: 800; color: #0D0D0D; }
+.mini-mini { height: 4px; background: #ECEEF2; border-radius: 2px; margin: 5px 0 3px; }
+.mini-fill { height: 100%; border-radius: 2px; }
+.mini-pct  { font-size: 10px; font-weight: 700; }
+.mini-goal { font-size: 10px; color: #AAA; margin-top: 2px; }
+
+/* ── TABLES ── */
+.tbl-card { background: white; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 8px rgba(0,0,0,0.03); overflow: hidden; }
+.tbl-hdr  { background: #0D0D0D; color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+.tbl-title { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.tbl-total { font-size: 14px; font-weight: 800; color: #00A3E0; }
+.tbl-toolbar { padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F0F2F5; }
+.tbl-search { border: 1px solid #D8DCE3; border-radius: 6px; padding: 5px 10px; font-size: 12px; color: #333; background: white; outline: none; width: 180px; }
+.tbl-search:focus { border-color: #00A3E0; box-shadow: 0 0 0 2px #00A3E020; }
+.row-count { font-size: 11px; color: #AAA; }
+
+.tbl-scroll { max-height: 400px; overflow-y: auto; }
+.tbl-scroll::-webkit-scrollbar { width: 3px; }
+.tbl-scroll::-webkit-scrollbar-track { background: #F4F6F9; }
+.tbl-scroll::-webkit-scrollbar-thumb { background: #C8CDD8; border-radius: 2px; }
+
+table.dt { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.dt thead { position: sticky; top: 0; z-index: 2; }
+table.dt th {
+  background: #F7F9FB; padding: 8px 12px; text-align: left;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #888; border-bottom: 2px solid #E8ECF2; cursor: pointer; user-select: none; white-space: nowrap;
+}
+table.dt th:hover { background: #EEF1F7; color: #333; }
+table.dt th.sa::after { content: ' ↑'; color: #00A3E0; }
+table.dt th.sd::after { content: ' ↓'; color: #00A3E0; }
+table.dt td { padding: 7px 12px; border-bottom: 1px solid #F2F4F8; color: #333F48; white-space: nowrap; }
+table.dt tr:last-child td { border-bottom: none; }
+table.dt tr:hover td { background: #F5F9FE; }
+
+.rank { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 700; }
+.r1 { background: #FFD700; color: #7A5800; }
+.r2 { background: #C0C0C0; color: #444; }
+.r3 { background: #CD7F32; color: #FFF; }
+.rn { background: #ECEEF2; color: #888; font-size: 9px; }
+
+.mix-cell { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.mix-bar  { flex: 1; height: 4px; background: #ECEEF2; border-radius: 2px; }
+.mix-fill { height: 100%; background: #00A3E0; border-radius: 2px; }
+.mix-txt  { font-size: 11px; font-weight: 700; color: #555; min-width: 38px; text-align: right; }
+
+.footer { text-align: center; color: #AAA; font-size: 10px; padding: 16px; letter-spacing: 0.04em; border-top: 1px solid #D8DCE3; margin-top: 24px; }
+
+/* ── TRANSITIONS ── */
+.fade-in { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0.4; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <div class="hdr-brand">
+    <div class="brand-stripe"></div>
+    <div>
+      <div class="hdr-title">Monday Sales Report</div>
+      <div class="hdr-meta" id="hdrMeta">Sonance / Dana Innovations</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="ship-block">
+      <div class="ship-num" id="shipNum">—</div>
+      <div class="ship-lbl">Shipping Days Left</div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK SELECTOR -->
+<div class="week-nav">
+  <button class="week-arrow" id="btnPrev" onclick="stepWeek(-1)">&#8249;</button>
+  <div class="week-strip-wrap">
+    <div class="week-strip" id="weekStrip"></div>
+  </div>
+  <button class="week-arrow" id="btnNext" onclick="stepWeek(1)">&#8250;</button>
+</div>
+
+<div class="main" id="mainContent">
+
+  <!-- MTD VS GOAL -->
+  <div class="sec-hdr"><h2>MTD Performance vs Goal</h2></div>
+  <div class="g3" id="secMTD"></div>
+
+  <!-- YOY -->
+  <div class="sec-hdr"><h2>2025 vs 2026 · MTD Year-Over-Year</h2></div>
+  <div class="g3" id="secYOY"></div>
+
+  <!-- Q2 VS GOAL -->
+  <div class="sec-hdr"><h2 id="q2Label">Q2 Actual vs Q2 Goal</h2></div>
+  <div class="g3" id="secQ2"></div>
+
+  <!-- CHANNEL MTD -->
+  <div class="sec-hdr"><h2>Channel MTD · Actual vs Goal</h2></div>
+  <div class="g7" id="secChMTD"></div>
+
+  <!-- CUSTOMERS -->
+  <div class="sec-hdr"><h2>Customer Rankings</h2></div>
+  <div class="g2">
+    <div class="tbl-card">
+      <div class="tbl-hdr">
+        <span class="tbl-title">Professional Channel</span>
+        <span class="tbl-total" id="proTotal">—</span>
+      </div>
+      <div class="tbl-toolbar">
+        <input class="tbl-search" id="proSearch" placeholder="Search customers…" oninput="filterTbl('proTbl',this.value,'proCount')">
+        <span class="row-count" id="proCount">—</span>
+      </div>
+      <div class="tbl-scroll"><table class="dt" id="proTbl">
+        <thead><tr>
+          <th onclick="sortTbl('proTbl',0)">#</th>
+          <th onclick="sortTbl('proTbl',1)">Customer</th>
+          <th onclick="sortTbl('proTbl',2)" style="text-align:right">Amount</th>
+          <th onclick="sortTbl('proTbl',3)" style="min-width:130px">Sales Mix</th>
+        </tr></thead>
+        <tbody id="proBody"></tbody>
+      </table></div>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-hdr">
+        <span class="tbl-title">Enterprise Channel</span>
+        <span class="tbl-total" id="entTotal">—</span>
+      </div>
+      <div class="tbl-toolbar">
+        <input class="tbl-search" id="entSearch" placeholder="Search customers…" oninput="filterTbl('entTbl',this.value,'entCount')">
+        <span class="row-count" id="entCount">—</span>
+      </div>
+      <div class="tbl-scroll"><table class="dt" id="entTbl">
+        <thead><tr>
+          <th onclick="sortTbl('entTbl',0)">#</th>
+          <th onclick="sortTbl('entTbl',1)">Customer</th>
+          <th onclick="sortTbl('entTbl',2)" style="text-align:right">Amount</th>
+          <th onclick="sortTbl('entTbl',3)" style="min-width:130px">Sales Mix</th>
+        </tr></thead>
+        <tbody id="entBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- YTD CHANNEL (latest week only) -->
+  <div id="ytdSection">
+    <div class="sec-hdr"><h2>YTD Channel Summary · vs Goal &amp; Prior Year</h2></div>
+    <div class="tbl-card">
+      <table class="dt" id="ytdTbl">
+        <thead><tr>
+          <th onclick="sortTbl('ytdTbl',0)">Channel</th>
+          <th onclick="sortTbl('ytdTbl',1)" style="text-align:right">YTD 2026</th>
+          <th onclick="sortTbl('ytdTbl',2)" style="text-align:right">YTD 2025</th>
+          <th onclick="sortTbl('ytdTbl',3)">YOY</th>
+          <th onclick="sortTbl('ytdTbl',4)">% to Goal</th>
+          <th onclick="sortTbl('ytdTbl',5)" style="text-align:right">$ to Goal</th>
+        </tr></thead>
+        <tbody id="ytdBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="footer">SONANCE / DANA INNOVATIONS &nbsp;·&nbsp; MONDAY SALES REPORT &nbsp;·&nbsp; CONFIDENTIAL</div>
+
+<script>
+// ════════════════ DATA ════════════════
+const WEEKS = [{"sheet": "12.31.25", "label": "Dec 31, 2025", "pro": {"customers": [{"id": "5550070", "name": "AVI-SPL LLC - DUBAI BRANCH", "amount": 642917.0, "mix": 0.4309}, {"id": "237104J", "name": "AVI-SPL - TAMPA", "amount": 367959.5, "mix": 0.2466}, {"id": "9220088", "name": "SPACE FACTORY MEDIA, INC.", "amount": 88600.0, "mix": 0.0594}, {"id": "9100022J", "name": "ALPHA VIDEO & AUDIO, INC", "amount": 41854.2, "mix": 0.0281}, {"id": "9200060J", "name": "KMH AUDIO VIDEO INTEGRATION INC", "amount": 36551.25, "mix": 0.0245}, {"id": "5530039", "name": "CBK DISTRIBUSJON AS", "amount": 36414.0, "mix": 0.0244}, {"id": "5530044", "name": "NICK J LAIOS S.A. - PROFESSIONAL", "amount": 28188.0, "mix": 0.0189}, {"id": "5530036", "name": "SPECIAL-ELEKTRONIK AB", "amount": 27121.0, "mix": 0.0182}, {"id": "9120011", "name": "SAVI CONTROLS, LLC", "amount": 24786.85, "mix": 0.0166}, {"id": "203761", "name": "IMMEDIA LLC", "amount": 19816.13, "mix": 0.0133}, {"id": "555110J", "name": "LSI SERVICES LTD", "amount": 18738.3, "mix": 0.0126}, {"id": "9200003J", "name": "PROTECH INDUSTRIES", "amount": 17200.0, "mix": 0.0115}, {"id": "9120011J", "name": "SAVI CONTROLS, LLC", "amount": 11760.0, "mix": 0.0079}, {"id": "205415J", "name": "DIVERSIFIED - NJ", "amount": 9360.0, "mix": 0.0063}, {"id": "2050008J", "name": "MCCANN SYSTEMS LLC", "amount": 7935.0, "mix": 0.0053}, {"id": "5550041", "name": "MINDSTEC DISTRIBUTION FZCO DUBAI", "amount": 7886.81, "mix": 0.0053}, {"id": "205737", "name": "USIS AUDIO VISUAL INC", "amount": 7665.55, "mix": 0.0051}, {"id": "5550088", "name": "SONIC ELECTRONICS & COMMUNICATION - FZCO", "amount": 6966.0, "mix": 0.0047}, {"id": "2080041J", "name": "ISF ENTERPRISES INC.", "amount": 6900.0, "mix": 0.0046}, {"id": "5550055", "name": "SONIC ELECTRONICS TRADING CO. LLC", "amount": 6387.08, "mix": 0.0043}, {"id": "9110010J", "name": "PUEO AUDIO LLC", "amount": 6280.0, "mix": 0.0042}, {"id": "5537062", "name": "KERN & STELLY MEDIENTECHNIK GmbH", "amount": 6001.2, "mix": 0.004}, {"id": "238482", "name": "MOOD MEDIA", "amount": 5348.0, "mix": 0.0036}, {"id": "5530034", "name": "KINOVOX SCANDINAVIA APS", "amount": 5022.0, "mix": 0.0034}, {"id": "5530023", "name": "HABITECH LTD - PROFESSIONAL", "amount": 4451.37, "mix": 0.003}, {"id": "5550083", "name": "BARKAI BENNY BROOKSTEIN LTD", "amount": 4320.0, "mix": 0.0029}, {"id": "2100020", "name": "AMERICAN SOUND & ELECTRONICS INC.", "amount": 4005.0, "mix": 0.0027}, {"id": "5550084", "name": "AV INTEGRA, S.R.O. - PROFESSIONAL", "amount": 3243.0, "mix": 0.0022}, {"id": "5510017", "name": "BESTEC AUDIO INC.", "amount": 2964.0, "mix": 0.002}, {"id": "9100212", "name": "NEW WORLD RESOURCES CORP.", "amount": 2932.8, "mix": 0.002}, {"id": "5510006", "name": "PT AUDIO VISUAL ABADI", "amount": 2856.01, "mix": 0.0019}, {"id": "203999J", "name": "SOUND DECISION (CA)", "amount": 2540.0, "mix": 0.0017}, {"id": "9100161", "name": "SOUND AND MEDIA SOLUTIONS, INC.", "amount": 2270.4, "mix": 0.0015}, {"id": "5530025", "name": "ZZIPP GROUP SPA", "amount": 2163.0, "mix": 0.0015}, {"id": "9190094J", "name": "GREY MATTER TECH CORP", "amount": 2067.8, "mix": 0.0014}, {"id": "9117004J", "name": "ADVANCED CABLE SOLUTIONS, INC.", "amount": 1640.0, "mix": 0.0011}, {"id": "219722J", "name": "LINX MULTIMEDIA LLLP", "amount": 1620.0, "mix": 0.0011}, {"id": "5580089", "name": "DISTRIBUIDORA TECSO - PROFESSIONAL", "amount": 1546.39, "mix": 0.001}, {"id": "213877J", "name": "OSA INTERNATIONAL INC", "amount": 1480.0, "mix": 0.001}, {"id": "222044J", "name": "COIT COM SATELLITE SERVICES, INC", "amount": 1390.0, "mix": 0.0009}, {"id": "9150069J", "name": "FIRST FIBER LLC", "amount": 1310.0, "mix": 0.0009}, {"id": "5510018", "name": "SHANGHAI GOLDEN BRIDGE INFOTECH CO., LTD", "amount": 1260.0, "mix": 0.0008}, {"id": "9160157J", "name": "PRINCE TECHNOLOGIES, LLC", "amount": 1260.0, "mix": 0.0008}, {"id": "9110109J", "name": "POINT 1 ELECTRICAL SYSTEMS", "amount": 1236.0, "mix": 0.0008}, {"id": "5700004", "name": "VICHAI TRADING (1983) CO., LTD.", "amount": 981.75, "mix": 0.0007}, {"id": "5500020", "name": "GEEKSCO SARL", "amount": 945.0, "mix": 0.0006}, {"id": "555124", "name": "EXTON EHF", "amount": 861.0, "mix": 0.0006}, {"id": "5510008", "name": "ADVANCED COMMUNICATION EQUIPMENT", "amount": 832.46, "mix": 0.0006}, {"id": "5530041", "name": "INTERSTATE AUDIO BV", "amount": 828.0, "mix": 0.0006}, {"id": "9110037", "name": "IES COMMUNICATIONS, LLC", "amount": 551.0, "mix": 0.0004}, {"id": "5530033", "name": "ATEC PRO GMBH", "amount": 547.8, "mix": 0.0004}, {"id": "5530045", "name": "STARSAV SL - PROFESSIONAL", "amount": 469.5, "mix": 0.0003}, {"id": "9100021", "name": "BLUEWATER TECHNOLOGIES", "amount": 365.01, "mix": 0.0002}, {"id": "5530020", "name": "PEATS WHOLESALE LTD", "amount": 315.0, "mix": 0.0002}, {"id": "208308J", "name": "WINSLOW DESIGN GROUP, INC.", "amount": 300.0, "mix": 0.0002}, {"id": "5550087", "name": "SONIC ELECTRONICS & TRADING WLL", "amount": 288.0, "mix": 0.0002}, {"id": "203625J", "name": "5 NORTH MEDIA INC", "amount": 240.0, "mix": 0.0001}, {"id": "9190091", "name": "TELANET INC", "amount": 112.0, "mix": 0.0}, {"id": "5550085J", "name": "AVI-SPL LLC - DUBAI BRANCH", "amount": 110.0, "mix": 0.0}], "total": 1491960.16}, "ent": {"customers": [{"id": "299062", "name": "DIRECT SOURCE INC", "amount": 411950.0, "mix": 0.4599}, {"id": "299083", "name": "ZONES INC.", "amount": 364395.84, "mix": 0.4068}, {"id": "2990121", "name": "MAGNETIC MEDIA NETWORK S.P.A.", "amount": 40920.0, "mix": 0.0457}, {"id": "2990106", "name": "TD SYNNEX CORPORATION", "amount": 29748.72, "mix": 0.0332}, {"id": "2990099", "name": "REITMANS (CANADA) LIMITED", "amount": 18030.0, "mix": 0.0201}, {"id": "2990116", "name": "GROUPE DYNAMITE INC.", "amount": 14000.0, "mix": 0.0156}, {"id": "299004", "name": "CORPORATE", "amount": 5710.0, "mix": 0.0064}, {"id": "2990041", "name": "PIONEER POS SOLUTIONS", "amount": 2730.0, "mix": 0.0031}, {"id": "2990127", "name": "SURO LOGISTICLE INDIA PRIVATE LIMITED", "amount": 2400.0, "mix": 0.0027}, {"id": "2990019", "name": "CEMEN TECH INC", "amount": 2240.0, "mix": 0.0025}, {"id": "2990101", "name": "INSIGHT CANADA INC.", "amount": 2217.6, "mix": 0.0024}, {"id": "299080", "name": "PEARL SOLUTIONS GROUP", "amount": 720.0, "mix": 0.0008}, {"id": "2990098", "name": "SHIJI US INC", "amount": 405.0, "mix": 0.0005}, {"id": "2990129", "name": "ZBS EU BV", "amount": 240.0, "mix": 0.0003}, {"id": "COMMERCIAL", "name": "37117829", "amount": 0.34091799927199407, "mix": 12654136.0}, {"id": "PROFESSIONAL", "name": "21951084", "amount": 0.3186139691324583, "mix": 6993922.0}, {"id": "ENTERPRISE", "name": "15166744", "amount": 0.37319908610575875, "mix": 5660215.0}, {"id": "COMMERCIAL", "name": "11268515", "amount": 0.8284207829424282, "mix": -2333890.0}, {"id": "PROFESSIONAL", "name": "8174196", "amount": 0.9943800747263453, "mix": -46198.0}, {"id": "ENTERPRISE", "name": "3094319", "amount": 0.5749373236137941, "mix": -2287692.0}, {"id": "COMMERCIAL", "name": "3800380", "amount": 1.2317484476659728, "mix": 715026.0}, {"id": "PROFESSIONAL", "name": "3054848", "amount": 1.6311435232103784, "mix": 1182022.0}, {"id": "ENTERPRISE", "name": "745531", "amount": 0.6148567290817202, "mix": -466997.0}, {"id": "COMMERCIAL", "name": "3800380", "amount": 0.9238111860403724, "mix": -313426.0}, {"id": "PROFESSIONAL", "name": "3054848", "amount": 1.223357315800476, "mix": 557746.0}, {"id": "ENTERPRISE", "name": "745531", "amount": 0.46114254681129013, "mix": -871173.0}, {"id": "COMMERCIAL", "name": "3027064", "amount": 0.2554673439345848, "mix": 773316.0}, {"id": "PROFESSIONAL", "name": "1778274", "amount": 0.7178724988387616, "mix": 1276574.0}, {"id": "AMAZON", "name": "42432", "amount": 1.827862496769191, "mix": 19218.0}, {"id": "IPORT PRODUCTS", "name": "159615", "amount": 0.8077232542722824, "mix": -37996.0}, {"id": "OEM", "name": "1042121", "amount": 2.498258374306886, "mix": 624982.0}, {"id": "DIRECT", "name": "39437", "amount": 0.6962870107169972, "mix": -17202.0}, {"id": "COM_ WEST", "name": "617194", "amount": 0.9929709458252824, "mix": -4369.0}, {"id": "COM_EAST", "name": "604536", "amount": 1.1919320175870975, "mix": 97346.0}], "total": 895725.66}, "summary": {"yoy": {"COMMERCIAL": {"val1": 11268515.0, "val2": 13602405.0, "var_pct": 0.8284207829424282, "var_dollar": -2333890.0}, "PROFESSIONAL": {"val1": 8174196.0, "val2": 8220394.0, "var_pct": 0.9943800747263453, "var_dollar": -46198.0}, "ENTERPRISE": {"val1": 3094319.0, "val2": 5382011.0, "var_pct": 0.5749373236137941, "var_dollar": -2287692.0}}, "q2_vs_goal": {}, "mtd_vs_goal": {"COMMERCIAL": {"val1": 3027064.0, "val2": 3800380.0, "var_pct": 0.2554673439345848, "var_dollar": 773316.0}, "PROFESSIONAL": {"val1": 1778274.0, "val2": 3054848.0, "var_pct": 0.7178724988387616, "var_dollar": 1276574.0}, "ENTERPRISE": {"val1": 1248790.0, "val2": 745531.0, "var_pct": -0.4029973013877433, "var_dollar": -503259.0}}, "channel_mtd": {"AMAZON": {"val1": 42432.0, "val2": 23214.0, "var_pct": 1.827862496769191, "var_dollar": 19218.0}, "IPORT PRODUCTS": {"val1": 159615.0, "val2": 197611.0, "var_pct": 0.8077232542722824, "var_dollar": -37996.0}, "OEM": {"val1": 1042121.0, "val2": 417139.0, "var_pct": 2.498258374306886, "var_dollar": 624982.0}, "DIRECT": {"val1": 39437.0, "val2": 56639.0, "var_pct": 0.6962870107169972, "var_dollar": -17202.0}, "COM_WEST": {"val1": 617194.0, "val2": 621563.0, "var_pct": 0.9929709458252824, "var_dollar": -4369.0}, "COM_EAST": {"val1": 604536.0, "val2": 507190.0, "var_pct": 1.1919320175870975, "var_dollar": 97346.0}}, "shipping_days": 0}}, {"sheet": "1.5.26", "label": "Jan 5, 2026", "pro": {"customers": [], "total": 0}, "ent": {"customers": [{"id": "COMMERCIAL", "name": "37117829", "amount": 0.34091799927199407, "mix": 12654136.0}, {"id": "PROFESSIONAL", "name": "21951084", "amount": 0.3186139691324583, "mix": 6993922.0}, {"id": "ENTERPRISE", "name": "15166744", "amount": 0.37319908610575875, "mix": 5660215.0}, {"id": "COMMERCIAL", "name": "11268515", "amount": 0.8284207829424282, "mix": -2333890.0}, {"id": "PROFESSIONAL", "name": "8174196", "amount": 0.9943800747263453, "mix": -46198.0}, {"id": "ENTERPRISE", "name": "3094319", "amount": 0.5749373236137941, "mix": -2287692.0}, {"id": "COMMERCIAL", "name": "3800380", "amount": 1.2317484476659728, "mix": 715026.0}, {"id": "PROFESSIONAL", "name": "3054848", "amount": 1.6311435232103784, "mix": 1182022.0}, {"id": "ENTERPRISE", "name": "745531", "amount": 0.6148567290817202, "mix": -466997.0}, {"id": "COMMERCIAL", "name": "3800380", "amount": 0.9238111860403724, "mix": -313426.0}, {"id": "PROFESSIONAL", "name": "3054848", "amount": 1.223357315800476, "mix": 557746.0}, {"id": "ENTERPRISE", "name": "745531", "amount": 0.46114254681129013, "mix": -871173.0}, {"id": "COMMERCIAL", "name": "3027064", "amount": 0.2554673439345848, "mix": 773316.0}, {"id": "AMAZON", "name": "42432", "amount": 1.827862496769191, "mix": 19218.0}, {"id": "IPORT PRODUCTS", "name": "159615", "amount": 0.8077232542722824, "mix": -37996.0}, {"id": "OEM", "name": "1042121", "amount": 2.498258374306886, "mix": 624982.0}, {"id": "DIRECT", "name": "39437", "amount": 0.6962870107169972, "mix": -17202.0}, {"id": "COM_ WEST", "name": "617194", "amount": 0.9929709458252824, "mix": -4369.0}, {"id": "COM_EAST", "name": "604536", "amount": 1.1919320175870975, "mix": 97346.0}], "total": 17.79}, "summary": {"yoy": {"COMMERCIAL": {"val1": 3027064.0, "val2": 3800380.0, "var_pct": 0.2554673439345848, "var_dollar": 773316.0}, "PROFESSIONAL": {"val1": 8174196.0, "val2": 8220394.0, "var_pct": 0.9943800747263453, "var_dollar": -46198.0}, "ENTERPRISE": {"val1": 1248790.0, "val2": 745531.0, "var_pct": -0.4029973013877433, "var_dollar": -503259.0}}, "q2_vs_goal": {}, "mtd_vs_goal": {"COMMERCIAL": {"val1": 3800380.0, "val2": 4113806.0, "var_pct": 0.9238111860403724, "var_dollar": -313426.0}, "PROFESSIONAL": {"val1": 3054848.0, "val2": 2497102.0, "var_pct": 1.223357315800476, "var_dollar": 557746.0}, "ENTERPRISE": {"val1": 745531.0, "val2": 1616704.0, "var_pct": 0.46114254681129013, "var_dollar": -871173.0}}, "channel_mtd": {"AMAZON": {"val1": 42432.0, "val2": 23214.0, "var_pct": 1.827862496769191, "var_dollar": 19218.0}, "IPORT PRODUCTS": {"val1": 159615.0, "val2": 197611.0, "var_pct": 0.8077232542722824, "var_dollar": -37996.0}, "OEM": {"val1": 1042121.0, "val2": 417139.0, "var_pct": 2.498258374306886, "var_dollar": 624982.0}, "DIRECT": {"val1": 39437.0, "val2": 56639.0, "var_pct": 0.6962870107169972, "var_dollar": -17202.0}, "COM_WEST": {"val1": 617194.0, "val2": 621563.0, "var_pct": 0.9929709458252824, "var_dollar": -4369.0}, "COM_EAST": {"val1": 604536.0, "val2": 507190.0, "var_pct": 1.1919320175870975, "var_dollar": 97346.0}}, "shipping_days": 0}}, {"sheet": "1.12.26", "label": "Jan 12, 2026", "pro": {"customers": [{"id": "5550070", "name": "AVI-SPL LLC - DUBAI BRANCH", "amount": 642917.0, "mix": 0.41197}, {"id": "237104J", "name": "AVI-SPL - TAMPA", "amount": 365184.5, "mix": 0.234}, {"id": "9220088", "name": "SPACE FACTORY MEDIA, INC.", "amount": 88600.0, "mix": 0.05677}, {"id": "5530025", "name": "ZZIPP GROUP SPA", "amount": 58888.0, "mix": 0.03773}, {"id": "5500001", "name": "SC MEDIA CANADA", "amount": 50231.35, "mix": 0.03219}, {"id": "9100022J", "name": "ALPHA VIDEO & AUDIO, INC", "amount": 47434.76, "mix": 0.03039}, {"id": "5530036", "name": "SPECIAL-ELEKTRONIK AB", "amount": 36346.0, "mix": 0.02329}, {"id": "9150022", "name": "ELECTROSONIC INC - FL", "amount": 25269.05, "mix": 0.01619}, {"id": "9120011", "name": "SAVI CONTROLS, LLC", "amount": 24864.2, "mix": 0.01593}, {"id": "203761", "name": "IMMEDIA LLC", "amount": 19816.13, "mix": 0.0127}, {"id": "555110J", "name": "LSI SERVICES LTD", "amount": 18738.3, "mix": 0.01201}, {"id": "2070215", "name": "356 INTEGRATIONS", "amount": 18705.0, "mix": 0.01198}, {"id": "9200003J", "name": "PROTECH INDUSTRIES", "amount": 17200.0, "mix": 0.01102}, {"id": "9150061", "name": "ESI PRODUCTION SERVICES", "amount": 15826.0, "mix": 0.01014}, {"id": "9150037", "name": "RITE TECHNOLOGY INC.", "amount": 13110.0, "mix": 0.0084}, {"id": "5530034", "name": "KINOVOX SCANDINAVIA APS", "amount": 12780.0, "mix": 0.00819}, {"id": "9120011J", "name": "SAVI CONTROLS, LLC", "amount": 11760.0, "mix": 0.00753}, {"id": "9190082", "name": "DEVINE TECHNOLOGY", "amount": 9889.15, "mix": 0.00634}, {"id": "555110", "name": "LSI SERVICES LTD", "amount": 8324.63, "mix": 0.00533}, {"id": "2050008J", "name": "MCCANN SYSTEMS LLC", "amount": 7935.0, "mix": 0.00508}, {"id": "205737", "name": "USIS AUDIO VISUAL INC", "amount": 7665.55, "mix": 0.00491}, {"id": "2080041J", "name": "ISF ENTERPRISES INC.", "amount": 6900.0, "mix": 0.00442}, {"id": "5530023", "name": "HABITECH LTD - PROFESSIONAL", "amount": 4451.37, "mix": 0.00285}, {"id": "221608", "name": "TSI GLOBAL COMPANIES, LLC", "amount": 4218.0, "mix": 0.0027}, {"id": "5550084", "name": "AV INTEGRA, S.R.O. - PROFESSIONAL", "amount": 3780.0, "mix": 0.00242}, {"id": "220714", "name": "TROX + TIERNEY", "amount": 3240.0, "mix": 0.00208}, {"id": "5510006", "name": "PT AUDIO VISUAL ABADI", "amount": 2856.01, "mix": 0.00183}, {"id": "5537062", "name": "KERN & STELLY MEDIENTECHNIK GmbH", "amount": 2724.0, "mix": 0.00174}, {"id": "9110109J", "name": "POINT 1 ELECTRICAL SYSTEMS", "amount": 2172.0, "mix": 0.00139}, {"id": "9190094J", "name": "GREY MATTER TECH CORP", "amount": 2067.8, "mix": 0.00133}, {"id": "5510017", "name": "BESTEC AUDIO INC.", "amount": 1848.0, "mix": 0.00118}, {"id": "205415J", "name": "DIVERSIFIED - NJ", "amount": 1800.0, "mix": 0.00115}, {"id": "5530039", "name": "CBK DISTRIBUSJON AS", "amount": 1701.0, "mix": 0.00109}, {"id": "9117004J", "name": "ADVANCED CABLE SOLUTIONS, INC.", "amount": 1640.0, "mix": 0.00105}, {"id": "219722J", "name": "LINX MULTIMEDIA LLLP", "amount": 1620.0, "mix": 0.00104}, {"id": "213877J", "name": "OSA INTERNATIONAL INC", "amount": 1480.0, "mix": 0.00095}, {"id": "5550085J", "name": "AVI-SPL LLC - DUBAI BRANCH", "amount": 1400.28, "mix": 0.0009}, {"id": "9150069J", "name": "FIRST FIBER LLC", "amount": 1310.0, "mix": 0.00084}, {"id": "5510018", "name": "SHANGHAI GOLDEN BRIDGE INFOTECH CO., LTD", "amount": 1260.0, "mix": 0.00081}, {"id": "9160157J", "name": "PRINCE TECHNOLOGIES, LLC", "amount": 1260.0, "mix": 0.00081}, {"id": "9110010J", "name": "PUEO AUDIO LLC", "amount": 1200.0, "mix": 0.00077}, {"id": "9220035", "name": "BRIGGS ELECTRIC, INC", "amount": 1083.6, "mix": 0.00069}, {"id": "5700004", "name": "VICHAI TRADING (1983) CO., LTD.", "amount": 981.75, "mix": 0.00063}, {"id": "5500020", "name": "GEEKSCO SARL", "amount": 945.0, "mix": 0.0006}, {"id": "5550081", "name": "AVIENTEK FZCO", "amount": 917.25, "mix": 0.00059}, {"id": "9150022J", "name": "ELECTROSONIC INC - FL", "amount": 874.0, "mix": 0.00056}, {"id": "555124", "name": "EXTON EHF", "amount": 861.0, "mix": 0.00055}, {"id": "2080003J", "name": "SUPPORT 305", "amount": 790.0, "mix": 0.00051}, {"id": "5550088", "name": "SONIC ELECTRONICS & COMMUNICATION - FZCO", "amount": 576.0, "mix": 0.00037}, {"id": "5530033", "name": "ATEC PRO GMBH", "amount": 547.8, "mix": 0.00035}, {"id": "9110032", "name": "ROSENDIN ELECTRIC INC.", "amount": 360.0, "mix": 0.00023}, {"id": "5650019", "name": "SC MEDIA - RESIDENTIAL", "amount": 352.8, "mix": 0.00023}, {"id": "9150049", "name": "MAXEFFECT COMPUTERS", "amount": 350.0, "mix": 0.00022}, {"id": "5530020", "name": "PEATS WHOLESALE LTD", "amount": 315.0, "mix": 0.0002}, {"id": "208308J", "name": "WINSLOW DESIGN GROUP, INC.", "amount": 300.0, "mix": 0.00019}, {"id": "5550087", "name": "SONIC ELECTRONICS & TRADING WLL", "amount": 288.0, "mix": 0.00018}, {"id": "203625J", "name": "5 NORTH MEDIA INC", "amount": 240.0, "mix": 0.00015}, {"id": "9170029", "name": "ILLUMINATED INTEGRATION LLC", "amount": 196.0, "mix": 0.00013}, {"id": "9190091", "name": "TELANET INC", "amount": 112.0, "mix": 7e-05}, {"id": 
