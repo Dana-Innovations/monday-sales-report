@@ -426,6 +426,12 @@ const mixBarHtml = mix => {
   const w = Math.min(mix * 100, 100);
   return `<div class="mix-cell"><div class="mix-bar"><div class="mix-fill" style="width:${w}%"></div></div><span class="mix-txt">${(mix*100).toFixed(2)}%</span></div>`;
 };
+const QUARTER_BY_MONTH = {
+  January: 'Q1', February: 'Q1', March: 'Q1',
+  April: 'Q2', May: 'Q2', June: 'Q2',
+  July: 'Q3', August: 'Q3', September: 'Q3',
+  October: 'Q4', November: 'Q4', December: 'Q4'
+};
 
 // ════════════════ WEEK SELECTOR ════════════════
 function buildWeekStrip() {
@@ -442,7 +448,7 @@ function buildWeekStrip() {
     }
     const isLatest = i === LATEST_IDX;
     const chipDate = w.label.replace(/,.*/, ''); // "May 25"
-    html += `<button class="week-chip${i===selectedIdx?' active':''} ${isLatest?'latest':''}" 
+    html += `<button class="week-chip${i===selectedIdx?' active':''} ${isLatest?'latest':''}"
                id="chip-${i}" onclick="selectWeek(${i})">${chipDate}</button>`;
   });
   strip.innerHTML = html;
@@ -479,6 +485,11 @@ function renderAll(idx) {
   const ship = s.shipping_days;
   document.getElementById('shipNum').textContent = ship != null ? ship : '—';
 
+  // Quarter label (derives from the week's month so it stays correct across quarter changes)
+  const qMonth = w.label.split(' ')[0];
+  const qLabel = QUARTER_BY_MONTH[qMonth] || 'Quarter';
+  document.getElementById('q2Label').textContent = `${qLabel} Actual vs ${qLabel} Goal`;
+
   // MTD vs Goal
   renderMetricCards('secMTD', s.mtd_vs_goal, {
     COMMERCIAL:   {label: 'Commercial',   val1Label: 'Actual', val2Label: 'MTD Goal'},
@@ -495,9 +506,9 @@ function renderAll(idx) {
 
   // Q2 vs Goal
   renderMetricCards('secQ2', s.q2_vs_goal, {
-    COMMERCIAL:   {label: 'Commercial',   val1Label: 'Q2 Actual', val2Label: 'Q2 Goal'},
-    PROFESSIONAL: {label: 'Professional', val1Label: 'Q2 Actual', val2Label: 'Q2 Goal'},
-    ENTERPRISE:   {label: 'Enterprise',   val1Label: 'Q2 Actual', val2Label: 'Q2 Goal'},
+    COMMERCIAL:   {label: 'Commercial',   val1Label: `${qLabel} Actual`, val2Label: `${qLabel} Goal`},
+    PROFESSIONAL: {label: 'Professional', val1Label: `${qLabel} Actual`, val2Label: `${qLabel} Goal`},
+    ENTERPRISE:   {label: 'Enterprise',   val1Label: `${qLabel} Actual`, val2Label: `${qLabel} Goal`},
   }, 'q2');
 
   // Channel MTD
