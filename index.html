@@ -426,12 +426,6 @@ const mixBarHtml = mix => {
   const w = Math.min(mix * 100, 100);
   return `<div class="mix-cell"><div class="mix-bar"><div class="mix-fill" style="width:${w}%"></div></div><span class="mix-txt">${(mix*100).toFixed(2)}%</span></div>`;
 };
-const QUARTER_BY_MONTH = {
-  January: 'Q1', February: 'Q1', March: 'Q1',
-  April: 'Q2', May: 'Q2', June: 'Q2',
-  July: 'Q3', August: 'Q3', September: 'Q3',
-  October: 'Q4', November: 'Q4', December: 'Q4'
-};
 
 // ════════════════ WEEK SELECTOR ════════════════
 function buildWeekStrip() {
@@ -474,6 +468,14 @@ function stepWeek(dir) {
   if (next >= 0 && next < WEEKS.length) selectWeek(next);
 }
 
+// ════════════════ QUARTER LABEL ════════════════
+const MONTH_TO_Q = {
+  January:1, February:1, March:1,
+  April:2, May:2, June:2,
+  July:3, August:3, September:3,
+  October:4, November:4, December:4
+};
+
 // ════════════════ RENDER ════════════════
 function renderAll(idx) {
   const w = WEEKS[idx];
@@ -485,10 +487,10 @@ function renderAll(idx) {
   const ship = s.shipping_days;
   document.getElementById('shipNum').textContent = ship != null ? ship : '—';
 
-  // Quarter label (derives from the week's month so it stays correct across quarter changes)
-  const qMonth = w.label.split(' ')[0];
-  const qLabel = QUARTER_BY_MONTH[qMonth] || 'Quarter';
-  document.getElementById('q2Label').textContent = `${qLabel} Actual vs ${qLabel} Goal`;
+  // Quarter label (derived from this week's month so it stays correct across quarters)
+  const monthName = (w.label || '').split(' ')[0];
+  const q = MONTH_TO_Q[monthName] || 2;
+  document.getElementById('q2Label').textContent = `Q${q} Actual vs Q${q} Goal`;
 
   // MTD vs Goal
   renderMetricCards('secMTD', s.mtd_vs_goal, {
@@ -506,9 +508,9 @@ function renderAll(idx) {
 
   // Q2 vs Goal
   renderMetricCards('secQ2', s.q2_vs_goal, {
-    COMMERCIAL:   {label: 'Commercial',   val1Label: `${qLabel} Actual`, val2Label: `${qLabel} Goal`},
-    PROFESSIONAL: {label: 'Professional', val1Label: `${qLabel} Actual`, val2Label: `${qLabel} Goal`},
-    ENTERPRISE:   {label: 'Enterprise',   val1Label: `${qLabel} Actual`, val2Label: `${qLabel} Goal`},
+    COMMERCIAL:   {label: 'Commercial',   val1Label: `Q${q} Actual`, val2Label: `Q${q} Goal`},
+    PROFESSIONAL: {label: 'Professional', val1Label: `Q${q} Actual`, val2Label: `Q${q} Goal`},
+    ENTERPRISE:   {label: 'Enterprise',   val1Label: `Q${q} Actual`, val2Label: `Q${q} Goal`},
   }, 'q2');
 
   // Channel MTD
