@@ -1,1 +1,92 @@
-[{"name": "ALL", "act26": 146668509.12, "act25": 140783833.37, "growth": 0.041799, "goal": 160763176.35, "pctGoal": 0.912326, "dollarGoal": -14094667.23}, {"name": "RESIDENTIAL", "act26": 97868033.05, "act25": 104959355.14, "growth": -0.067563, "goal": 116158351.49, "pctGoal": 0.842539, "dollarGoal": -18290318.44}, {"name": "LUXURY RESIDENTIAL", "act26": 59547980.8, "act25": 63852434.88, "growth": -0.067413, "goal": 71888559.53, "pctGoal": 0.828337, "dollarGoal": -12340578.73}, {"name": "NATIONAL ACCOUNTS", "act26": 22976168.32, "act25": 23578089.01, "growth": -0.025529, "goal": 25170348.46, "pctGoal": 0.912826, "dollarGoal": -2194180.14}, {"name": "RETAIL", "act26": 15851467.5, "act25": 17409832.59, "growth": -0.089511, "goal": 17387844.17, "pctGoal": 0.91164, "dollarGoal": -1536376.67}, {"name": "COMMERCIAL", "act26": 41019032.61, "act25": 30767281.27, "growth": 0.333203, "goal": 37598315.39, "pctGoal": 1.09098, "dollarGoal": 3420717.22}, {"name": "PROFESSIONAL", "act26": 27624004.74, "act25": 15806563.02, "growth": 0.747628, "goal": 23544308.63, "pctGoal": 1.173277, "dollarGoal": 4079696.11}, {"name": "ENTERPRISE", "act26": 13395027.87, "act25": 14960718.25, "growth": -0.104654, "goal": 14054006.76, "pctGoal": 0.95311, "dollarGoal": -658978.89}, {"name": "CI DISTRIBUTION", "act26": 6142390.03, "act25": 5190645.32, "growth": 0.183357, "goal": 6379045.13, "pctGoal": 0.962901, "dollarGoal": -236655.1}, {"name": "OTHER", "act26": 7781443.46, "act25": 5057196.96, "growth": 0.538687, "goal": 7006509.47, "pctGoal": 1.110602, "dollarGoal": 774933.99}]
+[
+  {
+    "name": "ALL",
+    "act26": 150790041.09,
+    "act25": 144009505.17,
+    "growth": 0.047083,
+    "goal": 166848227.7,
+    "pctGoal": 0.903742,
+    "dollarGoal": -16058186.61
+  },
+  {
+    "name": "RESIDENTIAL",
+    "act26": 100844700.45,
+    "act25": 107356944.53,
+    "growth": -0.060659,
+    "goal": 120446785.29,
+    "pctGoal": 0.837349,
+    "dollarGoal": -19602084.84
+  },
+  {
+    "name": "LUXURY RESIDENTIAL",
+    "act26": 61229402.48,
+    "act25": 65632191.41,
+    "growth": -0.067083,
+    "goal": 74249160.78,
+    "pctGoal": 0.824628,
+    "dollarGoal": -13019758.3
+  },
+  {
+    "name": "NATIONAL ACCOUNTS",
+    "act26": 23815366.75,
+    "act25": 23950283.85,
+    "growth": -0.005633,
+    "goal": 26530598.71,
+    "pctGoal": 0.897694,
+    "dollarGoal": -2715231.96
+  },
+  {
+    "name": "RETAIL",
+    "act26": 16502884.48,
+    "act25": 17510395.98,
+    "growth": -0.057535,
+    "goal": 18370187.57,
+    "pctGoal": 0.898348,
+    "dollarGoal": -1867303.09
+  },
+  {
+    "name": "COMMERCIAL",
+    "act26": 42024188.89,
+    "act25": 31545136.4,
+    "growth": 0.332153,
+    "goal": 39209915.99,
+    "pctGoal": 1.071768,
+    "dollarGoal": 2814272.9
+  },
+  {
+    "name": "PROFESSIONAL",
+    "act26": 28226631.87,
+    "act25": 16320202.74,
+    "growth": 0.729545,
+    "goal": 24628414.53,
+    "pctGoal": 1.146097,
+    "dollarGoal": 3598217.34
+  },
+  {
+    "name": "ENTERPRISE",
+    "act26": 13797557.02,
+    "act25": 15224933.66,
+    "growth": -0.093754,
+    "goal": 14581501.46,
+    "pctGoal": 0.946279,
+    "dollarGoal": -783944.44
+  },
+  {
+    "name": "CI DISTRIBUTION",
+    "act26": 6320965.08,
+    "act25": 5431826.45,
+    "growth": 0.163701,
+    "goal": 6667585.48,
+    "pctGoal": 0.94802,
+    "dollarGoal": -346620.4
+  },
+  {
+    "name": "OTHER",
+    "act26": 7921151.75,
+    "act25": 5107424.24,
+    "growth": 0.550909,
+    "goal": 7191526.42,
+    "pctGoal": 1.101456,
+    "dollarGoal": 729625.33
+  }
+]
